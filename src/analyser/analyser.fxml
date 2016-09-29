@@ -1,47 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.TextFlow?>
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0"
-            prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.102-ea" xmlns:fx="http://javafx.com/fxml/1"
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.102-ea" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="analyser.Controller">
     <children>
-        <BorderPane layoutX="193.0" layoutY="60.0" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0"
+        <BorderPane layoutX="193.0" layoutY="60.0" prefHeight="346.0" prefWidth="793.0" AnchorPane.bottomAnchor="0.0"
                     AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <top>
-                <HBox prefHeight="16.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+                <HBox maxWidth="Infinity" spacing="5.0" BorderPane.alignment="CENTER">
                     <children>
-                        <TextField fx:id="file_path" editable="false" prefHeight="26.0" prefWidth="475.0"/>
-                        <Button fx:id="open_button" mnemonicParsing="false" onAction="#openFile" prefHeight="26.0"
-                                prefWidth="132.0" text="Відкрити файл"/>
+                        <TextField fx:id="file_path" editable="false" focusTraversable="false" prefHeight="26.0"
+                                   prefWidth="475.0" HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="open_button" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                                onAction="#openFile" prefHeight="26.0" prefWidth="132.0" text="Відкрити файл"
+                                HBox.hgrow="ALWAYS"/>
                     </children>
                 </HBox>
             </top>
-            <bottom>
-                <GridPane BorderPane.alignment="CENTER">
-                    <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
-                        <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
-                    </columnConstraints>
-                    <rowConstraints>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES"/>
-                    </rowConstraints>
-                    <children>
-                        <Label text="Кількість діапазонів"/>
-                        <TextField fx:id="edit_range" GridPane.rowIndex="1"/>
-                        <Button fx:id="analyse_button" mnemonicParsing="false" onAction="#analyse" prefHeight="52.0"
-                                prefWidth="298.0" text="Аналізувати" GridPane.columnIndex="1"/>
-                        <Button fx:id="result_button" mnemonicParsing="false" onAction="#showResult" prefHeight="26.0"
-                                prefWidth="297.0" text="Переглянути результат" GridPane.columnIndex="1"
-                                GridPane.rowIndex="1"/>
-                    </children>
-                </GridPane>
-            </bottom>
             <center>
                 <TextFlow fx:id="text_flow" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER"/>
             </center>
+            <bottom>
+                <VBox spacing="5.0" BorderPane.alignment="CENTER">
+                    <children>
+                        <HBox prefHeight="14.0" prefWidth="793.0" spacing="5.0" VBox.vgrow="NEVER">
+                            <children>
+                                <Label focusTraversable="false" prefHeight="34.0" prefWidth="143.0"
+                                       text="Кількість діапазонів:" underline="true" HBox.hgrow="ALWAYS"/>
+                                <TextField fx:id="edit_range" prefHeight="26.0" prefWidth="330.0" HBox.hgrow="ALWAYS"/>
+                            </children>
+                        </HBox>
+                        <HBox alignment="TOP_CENTER" prefHeight="0.0" prefWidth="793.0" spacing="5.0"
+                              VBox.vgrow="ALWAYS">
+                            <children>
+                                <Button fx:id="result_button" mnemonicParsing="false" onAction="#showResult"
+                                        prefHeight="0.0" prefWidth="297.0" text="Переглянути результат"
+                                        HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="analyse_button" mnemonicParsing="false" onAction="#analyse"
+                                        prefHeight="0.0" prefWidth="298.0" text="Аналізувати" HBox.hgrow="ALWAYS"/>
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+            </bottom>
         </BorderPane>
     </children>
+    <padding>
+        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+    </padding>
 </AnchorPane>

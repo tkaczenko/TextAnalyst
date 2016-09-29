@@ -4,7 +4,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -15,8 +14,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -29,9 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -96,8 +92,10 @@ public class Controller {
         analyst.setNumOfRange(numOfRange);
 
         analyst.analyse();
-        colorMap = generateColorMap((int) analyst.getDelta());
+        colorMap = generateColorMap(numOfRange);
         ranges = analyst.getRanges();
+
+        System.out.println(Character.toString('.'));
 
         List<Text> texts = strings.parallelStream()
                 .map(s -> s.chars())
@@ -105,7 +103,12 @@ public class Controller {
                 .map(character -> {
                     String string = Character.toString(character);
                     Text text = new Text(string);
-                    text.setFill(colorMap.get(ranges.get(Character.toUpperCase(character))));
+                    Character temp = Character.toUpperCase(character);
+                    if (ranges.containsKey(temp)) {
+                        text.setFill(colorMap.get(ranges.get(Character.toUpperCase(character))));
+                    } else {
+                        text.setFill(Color.BLACK);
+                    }
                     return text;
                 })
                 .collect(Collectors.toList());
@@ -117,65 +120,55 @@ public class Controller {
     @FXML
     private void showResult(ActionEvent event) throws Exception {
         Stage stage = new Stage();
-        VBox anchorPane = new VBox();
+        BorderPane borderPane = new BorderPane();
         ScrollPane scrollPane = new ScrollPane();
         TextFlow textFlow = new TextFlow();
         Button button = new Button();
         button.setText("Побудувати гістограму");
-        button.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                Stage stage1 = new Stage();
-                AnchorPane anchorPane1 = new AnchorPane();
-                CategoryAxis xAxis = new CategoryAxis();
-                NumberAxis yAxis = new NumberAxis();
-                BarChart<String, Number> histogram = new BarChart<String, Number>(xAxis, yAxis);
+        button.setOnAction(event1 -> {
+            Stage histogramStage = new Stage();
+            BorderPane borderPaneHistogram = new BorderPane();
 
-                histogram.setTitle("Частотный аналіз літер тексту");
-                xAxis.setLabel("Діапазон");
-                yAxis.setLabel("Частота");
+            CategoryAxis xAxis = new CategoryAxis();
+            NumberAxis yAxis = new NumberAxis();
+            BarChart<String, Number> histogram = new BarChart<String, Number>(xAxis, yAxis);
+            histogram.setTitle("Частотный аналіз літер тексту");
+            xAxis.setLabel("Діапазон");
+            yAxis.setLabel("Частота");
 
-                int size = analyst.getNumOfRange();
-                Map<Integer, Long> count = analyst.getRanges().values().stream()
-                        .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+            Map<Integer, Long> count = ranges.values().stream()
+                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-                System.out.println("RANGES");
-                ranges.entrySet().stream().forEach(System.out::println);
+            List<Character> characters = ranges.entrySet().stream()
+                    .sorted(Map.Entry.<Character, Integer>comparingByValue())
+                    .map(entry -> entry.getKey())
+                    .collect(Collectors.toList());
 
-                System.out.println("COUNT");
-                count.entrySet().stream().forEach(System.out::println);
-
-                List<Character> characters = ranges.entrySet().stream()
-                        .sorted(Map.Entry.<Character, Integer>comparingByValue())
-                        .map(entry -> entry.getKey())
-                        .collect(Collectors.toList());
-                System.out.println("CHARACTERS");
-                characters.stream().forEach(System.out::println);
-
-                List<XYChart.Series<String, Number>> seriesList = count.entrySet().stream()
-                        .map(integerLongEntry -> {
-                            XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
-                            series.setName(Integer.toString(integerLongEntry.getKey()));
-                            int start = integerLongEntry.getKey();
-                            int delta = (start > 0) ? count.get(start - 1).intValue() : 0;
-                            for (int i = start * delta; i < delta + integerLongEntry.getValue(); i++) {
-                                Character temp = characters.get(i);
-                                series.getData().add(new XYChart.Data<>(Character.toString(temp), analyst.getCharacterCount().get(temp)));
-                            }
-                            return series;
-                        })
-                        .collect(Collectors.toList());
-
-                ObservableList<XYChart.Series<String, Number>> list = FXCollections.observableArrayList(seriesList);
-
-                histogram.setData(list);
-
-                anchorPane1.getChildren().add(histogram);
-
-                stage1.setTitle("Гістогргама");
-                stage1.setScene(new Scene(anchorPane1, 600, 400));
-                stage1.show();
+            Map<Character, Long> characterCount = analyst.getCharacterCount();
+            int start = 0;
+            int stop = 0;
+            List<XYChart.Series<String, Number>> seriesList = new ArrayList<XYChart.Series<String, Number>>();
+            for (Map.Entry<Integer, Long> entry : count.entrySet()) {
+                XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
+                series.setName(Integer.toString(entry.getKey()));
+                stop += entry.getValue().intValue();
+                for (int i = start; i < stop; i++) {
+                    Character character = characters.get(i);
+                    series.getData().add(
+                            new XYChart.Data<>(Character.toString(character), characterCount.get(character)));
+                    start++;
+                }
+                seriesList.add(series);
             }
+
+            ObservableList<XYChart.Series<String, Number>> list = FXCollections.observableArrayList(seriesList);
+            histogram.setData(list);
+
+            borderPaneHistogram.setCenter(histogram);
+
+            histogramStage.setTitle("Гістогргама");
+            histogramStage.setScene(new Scene(borderPaneHistogram));
+            histogramStage.show();
         });
 
         textFlow.getChildren().addListener((ListChangeListener<Node>) ((change) -> {
@@ -183,43 +176,51 @@ public class Controller {
             scrollPane.requestLayout();
             scrollPane.setVvalue(1.0F);
         }));
+
         scrollPane.setContent(textFlow);
 
-        List<Text> texts = analyst.getRanges().entrySet().stream()
-                .sorted(Map.Entry.<Character, Integer>comparingByValue().reversed())
+        List<Text> texts = ranges.entrySet().stream()
+                .sorted(Map.Entry.<Character, Integer>comparingByValue())
                 .map(entry -> {
                     String string = Character.toString(entry.getKey()) + " - " +
                             analyst.getCharacterCount().get(entry.getKey());
                     Text text = new Text(string + "\n");
-                    text.setFill(colorMap.get(analyst.getRanges().get(entry.getKey())));
+                    text.setFill(colorMap.get(ranges.get(entry.getKey())));
                     return text;
                 })
                 .collect(Collectors.toList());
 
         textFlow.getChildren().addAll(texts);
 
-        anchorPane.getChildren().addAll(scrollPane, button);
+        borderPane.setCenter(scrollPane);
+        borderPane.setBottom(button);
 
-        stage.setTitle("Результати частотного аналізу");
-        stage.setScene(new Scene(anchorPane, 600, 400));
+        stage.setTitle("Частоти");
+        stage.setScene(new Scene(borderPane));
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.show();
     }
 
     private Map<Integer, Color> generateColorMap(int size) {
         Map<Integer, Color> colorMap = new HashMap<>(size);
+        Random random = new Random(System.currentTimeMillis());
         for (int i = 0; i < size; i++) {
-            Color color = generateColor();
-            while (color == Color.WHITE || color == Color.BLACK || color == Color.GRAY || color == Color.LIGHTGRAY) {
-                color = generateColor();
+            Color color = generateColor(random);
+            while (color == Color.WHITE || color == Color.BLACK || color == Color.GRAY
+                    || color == Color.LIGHTGRAY || color == Color.DARKGRAY || color == Color.TRANSPARENT) {
+                color = generateColor(random);
             }
             colorMap.put(i, color);
         }
         return colorMap;
     }
 
-    private Color generateColor() {
-        return Color.color(Math.random(), Math.random(), Math.random());
+    private Color generateColor(Random random) {
+        int red = random.nextInt(256);
+        int green = random.nextInt(256);
+        int blue = random.nextInt(256);
+
+        return Color.rgb(red, green, blue);
     }
 
 }
