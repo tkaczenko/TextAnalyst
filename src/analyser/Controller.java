@@ -11,10 +11,12 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -32,6 +34,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Controller for {@code analyser.fxml}
+ *
+ * @see AnalystService
+ * @see TextFlow
+ * @see Text
+ */
 public class Controller {
     @FXML
     private TextField file_path;
@@ -49,11 +58,14 @@ public class Controller {
     @FXML
     public void initialize() {
         ScrollPane scrollPane = new ScrollPane();
+
+        // Make {@code text_flow} scrollable
         text_flow.getChildren().addListener((ListChangeListener<Node>) ((change) -> {
             text_flow.requestLayout();
             scrollPane.requestLayout();
             scrollPane.setVvalue(1.0F);
         }));
+
         scrollPane.setContent(text_flow);
     }
 
@@ -61,7 +73,7 @@ public class Controller {
     private void openFile(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Text files", "*.txt")
+                new FileChooser.ExtensionFilter("Текстові файли", "*.txt")
         );
         selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
@@ -71,6 +83,7 @@ public class Controller {
     }
 
     private void readFile() {
+        // Read file using NIO and stream of {@code String}
         try (Stream<String> stream = Files.lines(Paths.get(selectedFile.getAbsolutePath()))) {
             strings = stream.collect(Collectors.toList());
 
@@ -78,15 +91,27 @@ public class Controller {
                     .map(Text::new)
                     .collect(Collectors.toList());
 
+            text_flow.getChildren().clear();
             text_flow.getChildren().addAll(texts);
         } catch (IOException e) {
-            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Помилка читання файлу");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
         }
     }
 
     @FXML
     private void analyse(ActionEvent event) {
+        // Get number of range for letter frequency
         int numOfRange = Integer.parseInt(edit_range.getText());
+
+        if (strings == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Інформація");
+            alert.setContentText("Для початку аналізу необхідно відкрити файл");
+            alert.showAndWait();
+        }
 
         analyst.setStrings(strings);
         analyst.setNumOfRange(numOfRange);
@@ -95,8 +120,7 @@ public class Controller {
         colorMap = generateColorMap(numOfRange);
         ranges = analyst.getRanges();
 
-        System.out.println(Character.toString('.'));
-
+        // Add color to letter on the assumption of range
         List<Text> texts = strings.parallelStream()
                 .map(s -> s.chars())
                 .flatMap(intStream -> intStream.mapToObj(n -> (char) n))
@@ -119,16 +143,23 @@ public class Controller {
 
     @FXML
     private void showResult(ActionEvent event) throws Exception {
+        if (ranges == null) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Інформація");
+            alert.setContentText("Ви не виконали аналіз тексту");
+            alert.showAndWait();
+            return;
+        }
+
         Stage stage = new Stage();
         BorderPane borderPane = new BorderPane();
+        VBox vBox = new VBox();
         ScrollPane scrollPane = new ScrollPane();
         TextFlow textFlow = new TextFlow();
         Button button = new Button();
+
         button.setText("Побудувати гістограму");
         button.setOnAction(event1 -> {
-            Stage histogramStage = new Stage();
-            BorderPane borderPaneHistogram = new BorderPane();
-
             CategoryAxis xAxis = new CategoryAxis();
             NumberAxis yAxis = new NumberAxis();
             BarChart<String, Number> histogram = new BarChart<String, Number>(xAxis, yAxis);
@@ -136,14 +167,17 @@ public class Controller {
             xAxis.setLabel("Діапазон");
             yAxis.setLabel("Частота");
 
-            Map<Integer, Long> count = ranges.values().stream()
+            // Count letters of ranges
+            Map<Integer, Long> count = ranges.values().parallelStream()
                     .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-            List<Character> characters = ranges.entrySet().stream()
+            // Sort the letters by max frequency
+            List<Character> characters = ranges.entrySet().parallelStream()
                     .sorted(Map.Entry.<Character, Integer>comparingByValue())
                     .map(entry -> entry.getKey())
                     .collect(Collectors.toList());
 
+            // Create series for histogram that contain the number of range, letter and its frequency
             Map<Character, Long> characterCount = analyst.getCharacterCount();
             int start = 0;
             int stop = 0;
@@ -164,13 +198,10 @@ public class Controller {
             ObservableList<XYChart.Series<String, Number>> list = FXCollections.observableArrayList(seriesList);
             histogram.setData(list);
 
-            borderPaneHistogram.setCenter(histogram);
-
-            histogramStage.setTitle("Гістогргама");
-            histogramStage.setScene(new Scene(borderPaneHistogram));
-            histogramStage.show();
+            borderPane.setBottom(histogram);
         });
 
+        // Make textFlow scrollable
         textFlow.getChildren().addListener((ListChangeListener<Node>) ((change) -> {
             textFlow.requestLayout();
             scrollPane.requestLayout();
@@ -179,7 +210,8 @@ public class Controller {
 
         scrollPane.setContent(textFlow);
 
-        List<Text> texts = ranges.entrySet().stream()
+        // Add frequency and color to letter on the assumption of range
+        List<Text> texts = ranges.entrySet().parallelStream()
                 .sorted(Map.Entry.<Character, Integer>comparingByValue())
                 .map(entry -> {
                     String string = Character.toString(entry.getKey()) + " - " +
@@ -192,15 +224,22 @@ public class Controller {
 
         textFlow.getChildren().addAll(texts);
 
-        borderPane.setCenter(scrollPane);
-        borderPane.setBottom(button);
+        vBox.getChildren().addAll(scrollPane, button);
 
-        stage.setTitle("Частоти");
-        stage.setScene(new Scene(borderPane));
+        borderPane.setCenter(vBox);
+
+        stage.setTitle("Частотный аналіз тексту");
+        stage.setScene(new Scene(borderPane, 700, 400));
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.show();
     }
 
+    /**
+     * Generate colors for range
+     *
+     * @param size size of range
+     * @return Map<Number of range, Its color>
+     */
     private Map<Integer, Color> generateColorMap(int size) {
         Map<Integer, Color> colorMap = new HashMap<>(size);
         Random random = new Random(System.currentTimeMillis());
@@ -215,6 +254,7 @@ public class Controller {
         return colorMap;
     }
 
+    // Generate color using RGB
     private Color generateColor(Random random) {
         int red = random.nextInt(256);
         int green = random.nextInt(256);

@@ -8,14 +8,29 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Created by tkaczenko on 27.09.16.
+ * Service for calculating letter frequency in {@code List<String>}
+ *
+ * @author tkaczenko
  */
 public class AnalystService {
+    /**
+     * Text for calculating
+     */
     private List<String> strings;
 
+    /**
+     * Map of letter and its frequency
+     */
     private Map<Character, Long> characterCount;
+
+    /**
+     * Map of letter and its range
+     */
     private Map<Character, Integer> ranges;
 
+    /**
+     * Number of letter's range
+     */
     private int numOfRange;
 
     private double delta;
@@ -30,7 +45,7 @@ public class AnalystService {
         minFrequency = min().getValue();
         delta = (maxFrequency - minFrequency) / numOfRange;
 
-        List<Map.Entry<Character, Long>> entries = characterCount.entrySet().stream()
+        List<Map.Entry<Character, Long>> entries = characterCount.entrySet().parallelStream()
                 .sorted(Map.Entry.<Character, Long>comparingByValue().reversed())
                 .collect(Collectors.toList());
 
@@ -46,6 +61,10 @@ public class AnalystService {
         }
     }
 
+    /**
+     * Split words
+     * @return  List of words
+     */
     private List<String> splitWords() {
         return strings.parallelStream()
                 .flatMap(line -> Arrays.stream(line.trim().split("\\s")))
@@ -54,6 +73,10 @@ public class AnalystService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Calculate frequencies of all letters
+     * @param words List of words
+     */
     private void countLetters(List<String> words) {
         characterCount = words.parallelStream()
                 .map(s -> s.chars())
@@ -61,12 +84,20 @@ public class AnalystService {
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
     }
 
+    /**
+     * Calculate maximum frequency of letters
+     * @return  Entry of letter and its frequency
+     */
     private Map.Entry<Character, Long> min() {
         return characterCount.entrySet().parallelStream()
                 .min((e1, e2) -> Long.compare(e1.getValue(), e2.getValue()))
                 .get();
     }
 
+    /**
+     * Calcualte minimum frequency of letters
+     * @return  Entry of letter and its frequency
+     */
     private Map.Entry<Character, Long> max() {
         return characterCount.entrySet().parallelStream()
                 .max((e1, e2) -> Long.compare(e1.getValue(), e2.getValue()))
@@ -81,20 +112,24 @@ public class AnalystService {
         this.numOfRange = numOfRange;
     }
 
-    public int getNumOfRange() {
-        return numOfRange;
-    }
-
-    public double getDelta() {
-        return delta;
-    }
-
     public Map<Character, Integer> getRanges() {
         return ranges;
     }
 
     public Map<Character, Long> getCharacterCount() {
         return characterCount;
+    }
+
+    public double getDelta() {
+        return delta;
+    }
+
+    public Long getMaxFrequency() {
+        return maxFrequency;
+    }
+
+    public Long getMinFrequency() {
+        return minFrequency;
     }
 
 }

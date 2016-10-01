@@ -4,6 +4,11 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/**
+ * Application for calculating letter frequency using Stream API
+ *
+ * @author tkaczenko
+ */
 public class Main extends Application {
 
     @Override

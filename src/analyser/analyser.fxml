@@ -4,8 +4,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.TextFlow?>
-<AnchorPane xmlns="http://javafx.com/javafx/8.0.102-ea" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="analyser.Controller">
+<AnchorPane prefHeight="400.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/8.0.102-ea"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="analyser.Controller">
     <children>
         <BorderPane layoutX="193.0" layoutY="60.0" prefHeight="346.0" prefWidth="793.0" AnchorPane.bottomAnchor="0.0"
                     AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -21,7 +21,7 @@
                 </HBox>
             </top>
             <center>
-                <TextFlow fx:id="text_flow" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER"/>
+                <TextFlow fx:id="text_flow" prefHeight="263.0" prefWidth="647.0" BorderPane.alignment="CENTER"/>
             </center>
             <bottom>
                 <VBox spacing="5.0" BorderPane.alignment="CENTER">
@@ -36,11 +36,11 @@
                         <HBox alignment="TOP_CENTER" prefHeight="0.0" prefWidth="793.0" spacing="5.0"
                               VBox.vgrow="ALWAYS">
                             <children>
+                                <Button fx:id="analyse_button" mnemonicParsing="false" onAction="#analyse"
+                                        prefHeight="0.0" prefWidth="298.0" text="Аналізувати" HBox.hgrow="ALWAYS"/>
                                 <Button fx:id="result_button" mnemonicParsing="false" onAction="#showResult"
                                         prefHeight="0.0" prefWidth="297.0" text="Переглянути результат"
                                         HBox.hgrow="ALWAYS"/>
-                                <Button fx:id="analyse_button" mnemonicParsing="false" onAction="#analyse"
-                                        prefHeight="0.0" prefWidth="298.0" text="Аналізувати" HBox.hgrow="ALWAYS"/>
                             </children>
                         </HBox>
                     </children>
