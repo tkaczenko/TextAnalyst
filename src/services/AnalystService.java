@@ -1,9 +1,6 @@
 package services;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -13,6 +10,7 @@ import java.util.stream.Collectors;
  * @author tkaczenko
  */
 public class AnalystService {
+    private Locale locale;
     /**
      * Text for calculating
      */
@@ -36,6 +34,12 @@ public class AnalystService {
     private double delta;
     private Long maxFrequency;
     private Long minFrequency;
+
+    public AnalystService(List<String> strings, int numOfRange, Locale locale) {
+        setStrings(strings);
+        setNumOfRange(numOfRange);
+        setLocale(locale);
+    }
 
     public void analyse() {
         List<String> words = splitWords();
@@ -63,18 +67,20 @@ public class AnalystService {
 
     /**
      * Split words
-     * @return  List of words
+     *
+     * @return List of words
      */
     private List<String> splitWords() {
         return strings.parallelStream()
                 .flatMap(line -> Arrays.stream(line.trim().split("\\s")))
-                .map(word -> word.replaceAll("[^а-щА-ЩЬьЮюЯяЇїІіЄєҐґ]", "").toUpperCase().trim())
+                .map(word -> word.replaceAll(getLanguageRelatedCharacterRanges(), "").toUpperCase().trim())
                 .filter(word -> word.length() > 0)
                 .collect(Collectors.toList());
     }
 
     /**
      * Calculate frequencies of all letters
+     *
      * @param words List of words
      */
     private void countLetters(List<String> words) {
@@ -86,7 +92,8 @@ public class AnalystService {
 
     /**
      * Calculate maximum frequency of letters
-     * @return  Entry of letter and its frequency
+     *
+     * @return Entry of letter and its frequency
      */
     private Map.Entry<Character, Long> min() {
         return characterCount.entrySet().parallelStream()
@@ -96,12 +103,32 @@ public class AnalystService {
 
     /**
      * Calcualte minimum frequency of letters
-     * @return  Entry of letter and its frequency
+     *
+     * @return Entry of letter and its frequency
      */
     private Map.Entry<Character, Long> max() {
         return characterCount.entrySet().parallelStream()
                 .max((e1, e2) -> Long.compare(e1.getValue(), e2.getValue()))
                 .get();
+    }
+
+    private String getLanguageRelatedCharacterRanges() {
+        String res;
+        switch (locale.getLanguage()) {
+            case "en":
+                res = "[^а-zA-Z]";
+                break;
+            case "ru":
+                res = "[^а-яА-ЯёЁ]";
+                break;
+            case "uk":
+                res = "[^а-щА-ЩЬьЮюЯяЇїІіЄєҐґ]";
+                break;
+            default:
+                res = "[^а-zA-Z]";
+                break;
+        }
+        return res;
     }
 
     public void setStrings(List<String> strings) {
@@ -110,6 +137,10 @@ public class AnalystService {
 
     public void setNumOfRange(int numOfRange) {
         this.numOfRange = numOfRange;
+    }
+
+    public void setLocale(Locale locale) {
+        this.locale = locale;
     }
 
     public Map<Character, Integer> getRanges() {
@@ -131,5 +162,4 @@ public class AnalystService {
     public Long getMinFrequency() {
         return minFrequency;
     }
-
 }

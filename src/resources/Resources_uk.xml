@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <comment>Це файл налаштувань Java</comment>
+    <entry key="open_file">Відкрити файл</entry>
+    <entry key="numOfRange">Кількість діапазонів</entry>
+    <entry key="analyse">Аналізувати</entry>
+    <entry key="result">Переглянути результат</entry>
+    <entry key="text_files">Текстові файли</entry>
+    <entry key="read_error">Помилка читання файлу</entry>
+    <entry key="information">Інформація</entry>
+    <entry key="mess_analyse">Для початку аналізу необхідно відкрити файл</entry>
+    <entry key="mess_noanalyse">Ви не виконали аналіз</entry>
+    <entry key="create_histogram">Побудувати гістограму</entry>
+    <entry key="histogram_title">Частотний аналіз літер тексту</entry>
+    <entry key="xAxis">Діапазон</entry>
+    <entry key="yAxis">Частота</entry>
+    <entry key="stage">Частотний аналіз тексту</entry>
+    <entry key="app_name">TextAnalyst</entry>
+</properties>

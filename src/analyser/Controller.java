@@ -5,6 +5,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
@@ -16,6 +17,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -27,6 +30,7 @@ import services.AnalystService;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -41,22 +45,24 @@ import java.util.stream.Stream;
  * @see TextFlow
  * @see Text
  */
-public class Controller {
+public class Controller implements Initializable {
     @FXML
     private TextField file_path;
     @FXML
     private TextFlow text_flow;
     @FXML
     private TextField edit_range;
+    private ResourceBundle bundle;
 
-    private AnalystService analyst = new AnalystService();
+    private AnalystService analyst;
     private File selectedFile;
     private List<String> strings;
     private Map<Integer, Color> colorMap;
     private Map<Character, Integer> ranges;
 
-    @FXML
-    public void initialize() {
+    @Override
+    public void initialize(URL location, ResourceBundle bundle) {
+        this.bundle = bundle;
         ScrollPane scrollPane = new ScrollPane();
 
         // Make {@code text_flow} scrollable
@@ -73,7 +79,7 @@ public class Controller {
     private void openFile(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Текстові файли", "*.txt")
+                new FileChooser.ExtensionFilter(bundle.getString("text_files"), "*.txt")
         );
         selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
@@ -95,7 +101,7 @@ public class Controller {
             text_flow.getChildren().addAll(texts);
         } catch (IOException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Помилка читання файлу");
+            alert.setTitle(bundle.getString("read_error"));
             alert.setContentText(e.getMessage());
             alert.showAndWait();
         }
@@ -108,13 +114,12 @@ public class Controller {
 
         if (strings == null) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Інформація");
-            alert.setContentText("Для початку аналізу необхідно відкрити файл");
+            alert.setTitle(bundle.getString("information"));
+            alert.setContentText(bundle.getString("mess_analyse"));
             alert.showAndWait();
         }
 
-        analyst.setStrings(strings);
-        analyst.setNumOfRange(numOfRange);
+        analyst = new AnalystService(strings, numOfRange, bundle.getLocale());
 
         analyst.analyse();
         colorMap = generateColorMap(numOfRange);
@@ -145,8 +150,8 @@ public class Controller {
     private void showResult(ActionEvent event) throws Exception {
         if (ranges == null) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Інформація");
-            alert.setContentText("Ви не виконали аналіз тексту");
+            alert.setTitle(bundle.getString("information"));
+            alert.setContentText(bundle.getString("mess_noanalyse"));
             alert.showAndWait();
             return;
         }
@@ -156,16 +161,17 @@ public class Controller {
         VBox vBox = new VBox();
         ScrollPane scrollPane = new ScrollPane();
         TextFlow textFlow = new TextFlow();
+        HBox hBox = new HBox();
         Button button = new Button();
 
-        button.setText("Побудувати гістограму");
+        button.setText(bundle.getString("create_histogram"));
         button.setOnAction(event1 -> {
             CategoryAxis xAxis = new CategoryAxis();
             NumberAxis yAxis = new NumberAxis();
             BarChart<String, Number> histogram = new BarChart<String, Number>(xAxis, yAxis);
-            histogram.setTitle("Частотный аналіз літер тексту");
-            xAxis.setLabel("Діапазон");
-            yAxis.setLabel("Частота");
+            histogram.setTitle(bundle.getString("histogram_title"));
+            xAxis.setLabel(bundle.getString("xAxis"));
+            yAxis.setLabel(bundle.getString("yAxis"));
 
             // Count letters of ranges
             Map<Integer, Long> count = ranges.values().parallelStream()
@@ -224,12 +230,16 @@ public class Controller {
 
         textFlow.getChildren().addAll(texts);
 
+        hBox.setHgrow(button, Priority.ALWAYS);
+        button.setMaxWidth(Double.MAX_VALUE);
+        hBox.getChildren().add(button);
+
         vBox.getChildren().addAll(scrollPane, button);
 
         borderPane.setCenter(vBox);
 
-        stage.setTitle("Частотный аналіз тексту");
-        stage.setScene(new Scene(borderPane, 700, 400));
+        stage.setTitle(bundle.getString("stage"));
+        stage.setScene(new Scene(borderPane, 700, 500));
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.show();
     }

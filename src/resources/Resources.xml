@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <comment>This is a Java Property file</comment>
+    <entry key="open_file">Open file</entry>
+    <entry key="numOfRange">Number of ranges</entry>
+    <entry key="analyse">Analyse</entry>
+    <entry key="result">Show result</entry>
+    <entry key="text_files">Text files</entry>
+    <entry key="read_error">Error reading from file</entry>
+    <entry key="information">Information</entry>
+    <entry key="mess_analyse">You need to open file to start analysis</entry>
+    <entry key="mess_noanalyse">You don't analyse your file</entry>
+    <entry key="create_histogram">Create histogram</entry>
+    <entry key="histogram_title">Letter frequency in file</entry>
+    <entry key="xAxis">Range</entry>
+    <entry key="yAxis">Frequency</entry>
+    <entry key="stage">Frequency analysis of text</entry>
+    <entry key="app_name">TextAnalyst</entry>
+</properties>
