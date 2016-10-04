@@ -41,9 +41,16 @@ public class AnalystService {
         setLocale(locale);
     }
 
-    public void analyse() {
+    public void analyse() throws IllegalArgumentException {
         List<String> words = splitWords();
         countLetters(words);
+
+        Map.Entry<Character, Long> maxEntry = max();
+        Map.Entry<Character, Long> minEntry = min();
+
+        if (maxEntry == null || minEntry == null) {
+            throw new IllegalArgumentException("Language must equal language of user interface.");
+        }
 
         maxFrequency = max().getValue();
         minFrequency = min().getValue();
@@ -96,9 +103,9 @@ public class AnalystService {
      * @return Entry of letter and its frequency
      */
     private Map.Entry<Character, Long> min() {
-        return characterCount.entrySet().parallelStream()
-                .min((e1, e2) -> Long.compare(e1.getValue(), e2.getValue()))
-                .get();
+        Optional<Map.Entry<Character, Long>> optional = characterCount.entrySet().parallelStream()
+                .min((e1, e2) -> Long.compare(e1.getValue(), e2.getValue()));
+        return optional.isPresent() ? optional.get() : null;
     }
 
     /**
@@ -107,9 +114,9 @@ public class AnalystService {
      * @return Entry of letter and its frequency
      */
     private Map.Entry<Character, Long> max() {
-        return characterCount.entrySet().parallelStream()
-                .max((e1, e2) -> Long.compare(e1.getValue(), e2.getValue()))
-                .get();
+        Optional<Map.Entry<Character, Long>> optional = characterCount.entrySet().parallelStream()
+                .max((e1, e2) -> Long.compare(e1.getValue(), e2.getValue()));
+        return optional.isPresent() ? optional.get() : null;
     }
 
     private String getLanguageRelatedCharacterRanges() {
@@ -125,7 +132,7 @@ public class AnalystService {
                 res = "[^а-щА-ЩЬьЮюЯяЇїІіЄєҐґ]";
                 break;
             default:
-                res = "[^а-zA-Z]";
+                res = "[^a-zA-Z]";
                 break;
         }
         return res;

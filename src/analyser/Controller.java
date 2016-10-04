@@ -101,7 +101,7 @@ public class Controller implements Initializable {
             text_flow.getChildren().addAll(texts);
         } catch (IOException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle(bundle.getString("read_error"));
+            alert.setHeaderText(bundle.getString("read_error"));
             alert.setContentText(e.getMessage());
             alert.showAndWait();
         }
@@ -114,43 +114,51 @@ public class Controller implements Initializable {
 
         if (strings == null) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle(bundle.getString("information"));
+            alert.setHeaderText(bundle.getString("information"));
             alert.setContentText(bundle.getString("mess_analyse"));
             alert.showAndWait();
         }
 
         analyst = new AnalystService(strings, numOfRange, bundle.getLocale());
 
-        analyst.analyse();
-        colorMap = generateColorMap(numOfRange);
-        ranges = analyst.getRanges();
+        try {
+            analyst.analyse();
 
-        // Add color to letter on the assumption of range
-        List<Text> texts = strings.parallelStream()
-                .map(s -> s.chars())
-                .flatMap(intStream -> intStream.mapToObj(n -> (char) n))
-                .map(character -> {
-                    String string = Character.toString(character);
-                    Text text = new Text(string);
-                    Character temp = Character.toUpperCase(character);
-                    if (ranges.containsKey(temp)) {
-                        text.setFill(colorMap.get(ranges.get(Character.toUpperCase(character))));
-                    } else {
-                        text.setFill(Color.BLACK);
-                    }
-                    return text;
-                })
-                .collect(Collectors.toList());
+            colorMap = generateColorMap(numOfRange);
+            ranges = analyst.getRanges();
 
-        text_flow.getChildren().clear();
-        text_flow.getChildren().addAll(texts);
+            // Add color to letter on the assumption of range
+            List<Text> texts = strings.parallelStream()
+                    .map(s -> s.chars())
+                    .flatMap(intStream -> intStream.mapToObj(n -> (char) n))
+                    .map(character -> {
+                        String string = Character.toString(character);
+                        Text text = new Text(string);
+                        Character temp = Character.toUpperCase(character);
+                        if (ranges.containsKey(temp)) {
+                            text.setFill(colorMap.get(ranges.get(Character.toUpperCase(character))));
+                        } else {
+                            text.setFill(Color.BLACK);
+                        }
+                        return text;
+                    })
+                    .collect(Collectors.toList());
+
+            text_flow.getChildren().clear();
+            text_flow.getChildren().addAll(texts);
+        } catch (IllegalArgumentException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setHeaderText("Error of text language");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+        }
     }
 
     @FXML
     private void showResult(ActionEvent event) throws Exception {
         if (ranges == null) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle(bundle.getString("information"));
+            alert.setHeaderText(bundle.getString("information"));
             alert.setContentText(bundle.getString("mess_noanalyse"));
             alert.showAndWait();
             return;
