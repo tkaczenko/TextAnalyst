@@ -17,4 +17,7 @@
     <entry key="yAxis">Частота</entry>
     <entry key="stage">Частотный анализ текста</entry>
     <entry key="app_name">TextAnalyst</entry>
+    <entry key="range_text">Введите целое число</entry>
+    <entry key="input_err">Ошибка ввода</entry>
+    <entry key="input_mess">Пожалуйста, введите целое число для параметра</entry>
 </properties>

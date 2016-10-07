@@ -17,4 +17,7 @@
     <entry key="yAxis">Frequency</entry>
     <entry key="stage">Frequency analysis of text</entry>
     <entry key="app_name">TextAnalyst</entry>
+    <entry key="range_text">Enter only integer numbers</entry>
+    <entry key="input_err">Input error</entry>
+    <entry key="input_mess">Please, write integer number for the parametr</entry>
 </properties>

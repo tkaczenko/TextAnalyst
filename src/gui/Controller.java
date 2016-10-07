@@ -1,4 +1,4 @@
-package analyser;
+package gui;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -51,7 +51,7 @@ public class Controller implements Initializable {
     @FXML
     private TextFlow text_flow;
     @FXML
-    private TextField edit_range;
+    private NumberTextField edit_range;
     private ResourceBundle bundle;
 
     private AnalystService analyst;
@@ -64,6 +64,7 @@ public class Controller implements Initializable {
     public void initialize(URL location, ResourceBundle bundle) {
         this.bundle = bundle;
         ScrollPane scrollPane = new ScrollPane();
+        edit_range.setPromptText(bundle.getString("range_text"));
 
         // Make {@code text_flow} scrollable
         text_flow.getChildren().addListener((ListChangeListener<Node>) ((change) -> {
@@ -110,13 +111,24 @@ public class Controller implements Initializable {
     @FXML
     private void analyse(ActionEvent event) {
         // Get number of range for letter frequency
-        int numOfRange = Integer.parseInt(edit_range.getText());
+        int numOfRange;
+        String editText = edit_range.getText();
+        if (editText.trim().length() > 0) {
+            numOfRange = Integer.parseInt(edit_range.getText());
+        } else {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setHeaderText(bundle.getString("input_err"));
+            alert.setContentText(bundle.getString("input_mess"));
+            alert.showAndWait();
+            return;
+        }
 
         if (strings == null) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setHeaderText(bundle.getString("information"));
             alert.setContentText(bundle.getString("mess_analyse"));
             alert.showAndWait();
+            return;
         }
 
         analyst = new AnalystService(strings, numOfRange, bundle.getLocale());

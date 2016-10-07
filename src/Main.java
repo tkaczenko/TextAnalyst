@@ -79,7 +79,7 @@ public class Main extends Application {
                             return bundle;
                         }
                     });
-            Parent root = FXMLLoader.load(getClass().getResource("analyser/analyser.fxml"), bundle);
+            Parent root = FXMLLoader.load(getClass().getResource("gui/analyser.fxml"), bundle);
             primaryStage.setTitle(bundle.getString("app_name"));
             primaryStage.setScene(new Scene(root));
             primaryStage.show();
