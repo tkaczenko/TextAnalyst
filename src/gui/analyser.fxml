@@ -22,7 +22,12 @@
                 </HBox>
             </top>
             <center>
-                <TextFlow fx:id="text_flow" prefHeight="263.0" prefWidth="647.0" BorderPane.alignment="CENTER"/>
+                <ScrollPane fx:id="scroll_pane">
+                    <TextFlow fx:id="text_flow" prefHeight="263.0" prefWidth="647.0" BorderPane.alignment="CENTER"/>
+                    <BorderPane.margin>
+                        <Insets bottom="5.0" top="5.0"/>
+                    </BorderPane.margin>
+                </ScrollPane>
             </center>
             <bottom>
                 <VBox spacing="5.0" BorderPane.alignment="CENTER">

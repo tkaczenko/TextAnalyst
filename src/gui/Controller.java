@@ -52,6 +52,7 @@ public class Controller implements Initializable {
     private TextFlow text_flow;
     @FXML
     private NumberTextField edit_range;
+
     private ResourceBundle bundle;
 
     private AnalystService analyst;
@@ -63,17 +64,6 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle bundle) {
         this.bundle = bundle;
-        ScrollPane scrollPane = new ScrollPane();
-        edit_range.setPromptText(bundle.getString("range_text"));
-
-        // Make {@code text_flow} scrollable
-        text_flow.getChildren().addListener((ListChangeListener<Node>) ((change) -> {
-            text_flow.requestLayout();
-            scrollPane.requestLayout();
-            scrollPane.setVvalue(1.0F);
-        }));
-
-        scrollPane.setContent(text_flow);
     }
 
     @FXML
